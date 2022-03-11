@@ -1,12 +1,11 @@
-import React from "react";
 import {drawTiles, drawAnswer} from "./drawTiles";
 
-const Board = ({guesses, guessSize, word, game, hasStarted, letters}) => {
+const Board = ({guesses, guessSize, word, game, hasStarted, letters, board}) => {
   const gridTemplateColumns = `repeat(${word.answer.length}, 1fr)`;
 
   return (
     <>
-      <div className="board" style={{gridTemplateColumns}}>
+      <div className="board" ref={board} style={{gridTemplateColumns}}>
         {drawTiles(guesses, guessSize, word, letters.current, hasStarted)}
       </div>
       {hasStarted && guesses.guesses[guesses.guesses.length - 1] !== word.answer && !game.isPlaying && (

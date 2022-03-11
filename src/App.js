@@ -1,4 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
+import {ToastContainer, toast} from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 import Board from "./components/Board";
@@ -19,6 +21,7 @@ const App = () => {
   const letters = useRef({incorrect: new Set(), correct: new Set(), perfect: new Set(["A"])});
   const counter = useRef(50);
   const hasStarted = currentRound.current > 0;
+  const board = useRef();
 
   // Word lists from API
   useEffect(() => {
@@ -94,12 +97,17 @@ const App = () => {
   };
 
   const makeGuess = guess => {
+    if (guess.length < word.answer.length) {
+      doShake("Not enough letters.");
+      return false;
+    }
+
     if (window.dictionary && !window.dictionary.includes(guesses.current.toLowerCase())) {
+      doShake("Word not accepted.");
       return false;
     }
 
     if (guesses.guesses.length >= guessSize || counter.current <= 0) return false;
-    if (guess.length < word.answer.length) return false;
 
     const temp = [...guesses.guesses];
     temp.push(guess);
@@ -114,13 +122,34 @@ const App = () => {
     return true;
   };
 
+  const doShake = message => {
+    toast.error(message);
+    board.current.classList.add("shake");
+    setTimeout(() => {
+      board.current.classList.remove("shake");
+    }, 500);
+  };
+
   return (
     <div className="game">
       <Settings game={game} setGame={setGame} word={word} />
-      <div className="title">
-        <h1>Peaky Lingo</h1>
-        {hasStarted && <h2>Round: {currentRound.current}</h2>}
+
+      <div className="toast">
+        <ToastContainer
+          position="top-right"
+          autoClose={2000}
+          hideProgressBar
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss={false}
+          draggable={false}
+          pauseOnHover={false}
+          theme="dark"
+        />
       </div>
+
+      <div className="title">{hasStarted ? <h2>Round: {currentRound.current}</h2> : <h1>Peaky Lingo</h1>}</div>
 
       <div>
         <Board
@@ -130,6 +159,7 @@ const App = () => {
           game={game}
           hasStarted={hasStarted}
           letters={letters}
+          board={board}
         />
         {game.timerEnabled && <TimerBar percent={counter.current} />}
       </div>

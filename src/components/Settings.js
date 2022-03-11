@@ -1,5 +1,6 @@
 import React from "react";
 import {IoFlagOutline, IoInformationCircleOutline, IoTimerOutline} from "react-icons/io5";
+import {BiBarChartAlt2} from "react-icons/bi";
 import axios from "axios";
 
 const Settings = ({game, setGame, word}) => {
@@ -15,6 +16,8 @@ const Settings = ({game, setGame, word}) => {
       axios.patch("https://api.peaky.uk/peaky/items/lingo/" + word.answer, {flagged: 1});
     }
   };
+
+  const leaderboard = () => alert("Leaderboard coming soon.");
 
   const define = () => {
     window.open(`https://www.google.com/search?q=define+${word.answer.toLowerCase()}`, "_blank");
@@ -40,6 +43,9 @@ const Settings = ({game, setGame, word}) => {
           </div>
         </>
       )}
+      <div className="leaderIcon" title="Show Leaderboard" onClick={leaderboard} onTouchEnd={leaderboard}>
+        <BiBarChartAlt2 />
+      </div>
     </div>
   );
 };

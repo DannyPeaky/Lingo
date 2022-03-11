@@ -6,6 +6,7 @@ const Controls = ({useGuesses, game, letters, word, firstLetter, makeGuess, next
   const [guesses, setGuesses] = useGuesses;
   const keyboard = useRef();
   const usedFirst = useRef(false);
+  const button = useRef();
 
   useEffect(() => {
     window.addEventListener("keydown", handleInput);
@@ -28,26 +29,30 @@ const Controls = ({useGuesses, game, letters, word, firstLetter, makeGuess, next
     if (key.key) key = key.key;
     key = key.toUpperCase();
 
-    if (key === "ENTER" || key === "{ENTER}") {
-      const guess = guesses.current;
-      if (makeGuess(guess)) {
-        keyboard.current.setInput("");
+    if (!game.isPlaying) {
+      if (key === "ENTER") button.current.click();
+    } else {
+      if (key === "ENTER" || key === "{ENTER}") {
+        const guess = guesses.current;
+        if (makeGuess(guess)) {
+          keyboard.current.setInput("");
+        }
+      } else if (key === "BACKSPACE" || key === "{BKSP}") {
+        const newGuess = guesses.current.slice(0, guesses.current.length - 1);
+        setGuesses({...guesses, current: newGuess});
+        keyboard.current.setInput(newGuess);
+      } else if (!doubleLetter(key) && key.length <= 1 && guesses.current.length + 1 <= word.answer.length) {
+        const newGuess = guesses.current + key;
+        setGuesses({...guesses, current: newGuess});
+        keyboard.current.setInput(newGuess);
       }
-    } else if (key === "BACKSPACE" || key === "{BKSP}") {
-      const newGuess = guesses.current.slice(0, guesses.current.length - 1);
-      setGuesses({...guesses, current: newGuess});
-      keyboard.current.setInput(newGuess);
-    } else if (!doubleLetter(key) && key.length <= 1 && guesses.current.length + 1 <= word.answer.length) {
-      const newGuess = guesses.current + key;
-      setGuesses({...guesses, current: newGuess});
-      keyboard.current.setInput(newGuess);
     }
   };
 
   return (
     <div className="controls">
       {!game.isPlaying ? (
-        <button onTouchEnd={nextRound} onClick={nextRound}>
+        <button ref={button} onTouchEnd={nextRound} onClick={nextRound}>
           {!hasStarted ? "Start Game" : "Next Round"}
         </button>
       ) : (

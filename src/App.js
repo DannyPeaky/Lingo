@@ -65,6 +65,7 @@ const App = () => {
     const roundLength = 4;
 
     currentRound.current += 1;
+    // Cycle between the word lengths, 4 rounds per length
     const wordLength = rounds[Math.floor((currentRound.current - 1) / roundLength) % levels];
 
     // Select a word from round's word length
@@ -91,6 +92,7 @@ const App = () => {
       perfect: new Set([firstLetter]),
     };
 
+    setWords(tempWords);
     setWord({answer, letters: answerLetters});
     setGuesses({current: firstLetter, guesses: []});
     setGame({...game, isPlaying: true});

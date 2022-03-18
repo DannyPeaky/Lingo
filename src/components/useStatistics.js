@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {IoCloseOutline} from "react-icons/io5";
 import {BsToggleOff, BsToggleOn} from "react-icons/bs";
-import "./Statistics.scss";
 
 import {Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend} from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";

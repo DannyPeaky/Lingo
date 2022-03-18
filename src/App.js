@@ -246,7 +246,7 @@ const App = () => {
             maxRounds={maxRounds}
           />
         )}
-        <small className="disclaimer">*Scores are only saved when you finish all 9 rounds</small>
+        <small className="disclaimer">*Scores are only saved when you finish all {maxRounds} rounds</small>
       </div>
     </>
   );

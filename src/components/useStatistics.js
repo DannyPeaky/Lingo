@@ -10,7 +10,9 @@ import generateData from "./generateData";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ChartDataLabels);
 ChartJS.defaults.set("plugins.datalabels", {
-  color: "#FFF",
+  font: {
+    weight: "bold",
+  },
 });
 
 const useStatistics = () => {
@@ -20,36 +22,38 @@ const useStatistics = () => {
 
   const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
   const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+  const scales = {ticks: {color: "#fff"}, grid: {color: "#55555555", borderColor: "#fff"}};
 
   const options = {
-    maintainAspectRatio: true,
     aspectRatio: vw / vh,
     responsive: true,
     plugins: {
-      legend: {position: vw > 700 ? "right" : "bottom", color: "#fff"},
+      legend: {position: vw > 700 ? "right" : "bottom", labels: {color: "#fff"}},
       title: {display: false},
-      datalabels: {align: "end"},
+      datalabels: {anchor: "end", align: "start", clip: true},
     },
-    scales: {
-      x: {ticks: {color: "#fff"}, grid: {color: "#55555555", borderColor: "#fff"}},
-      y: {ticks: {color: "#fff"}, grid: {color: "#55555555", borderColor: "#fff"}, beginAtZero: true},
-    },
+    scales: {x: scales, y: {...scales, beginAtZero: true}},
   };
+
+  const onToggle = () => setToggleSet(!toggleSet);
+  const onClose = () => setShow(false);
 
   const Statistics = () => {
     return (
-      <div className="leaderboard" style={{display: show ? "grid" : "none"}}>
+      <div className="leaderboard" style={{display: show ? (vw > 500 ? "flex" : "block") : "none"}}>
         <div className="modal">
-          <div
-            className="toggle"
-            title="Toggle Between Last Round and All Data"
-            onClick={() => setToggleSet(!toggleSet)}
-          >
+          <div className="toggle" title="Toggle Between Last and All Games" onClick={onToggle} onTouchEnd={onToggle}>
             {current && (toggleSet ? <BsToggleOn /> : <BsToggleOff />)}
-            {current && (toggleSet ? <p>Last Round</p> : <p>All Rounds</p>)}
+            {current && (
+              <p style={{textAlign: "center"}}>
+                Only Last
+                <br />
+                Game
+              </p>
+            )}
           </div>
 
-          <div className="close" onClick={() => setShow(false)}>
+          <div className="close" onClick={onClose} onTouchEnd={onClose}>
             <IoCloseOutline />
           </div>
 

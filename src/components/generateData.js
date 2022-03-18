@@ -14,9 +14,9 @@ const generateData = thisRound => {
 
   try {
     stats = thisRound || JSON.parse(localStorage.getItem("stats"));
+    if (!stats) throw new Error("No stats.");
   } catch (e) {
-    console.log(e);
-    return;
+    return data;
   }
 
   for (const set of datasets) {

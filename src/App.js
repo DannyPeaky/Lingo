@@ -34,7 +34,7 @@ const generateEmptySet = () => {
 };
 
 const App = () => {
-  const [words, setWords] = useState();
+  const [words, setWords] = useState({});
   const [word, setWord] = useState(defaultState.word);
   const [guesses, setGuesses] = useState(defaultState.guesses);
   const [game, setGame] = useState({isPlaying: false, timerEnabled: getTimer()});
@@ -96,23 +96,15 @@ const App = () => {
 
       try {
         stats = JSON.parse(localStorage.getItem("stats"));
-        console.log(stats, currentStats.current);
 
         // For every word length
         for (const [length, obj] of Object.entries(stats)) {
           // For every attempt of each word length
-          for (const [attempts, count] of Object.entries(obj)) {
+          for (const [attempts] of Object.entries(obj)) {
             stats[length][attempts] += currentStats.current[length][attempts];
-            console.log("Length & Attempts:", length, attempts);
-            console.log("Count:", count);
-            console.log("Current count:", currentStats.current[length][attempts]);
-            console.log("Sum:", count + currentStats.current[length][attempts]);
           }
         }
-
-        console.log(stats);
       } catch (e) {
-        console.log(e);
         stats = {...currentStats.current};
       }
 

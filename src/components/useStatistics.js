@@ -53,9 +53,7 @@ const useStatistics = () => {
             <IoCloseOutline />
           </div>
 
-          <div className="title" onClick={() => console.log(generateData(true))}>
-            Statistics
-          </div>
+          <div className="title">Statistics</div>
 
           <div className="graph">
             {show && <Bar options={options} data={generateData(toggleSet ? current : false)} />}

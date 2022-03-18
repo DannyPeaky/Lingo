@@ -166,6 +166,13 @@ body {
   color: white;
 }
 
+.disclaimer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 16px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);

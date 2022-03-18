@@ -2,7 +2,18 @@ import {useRef, useEffect} from "react";
 import "react-simple-keyboard/build/css/index.css";
 import ReactKeyboard from "react-simple-keyboard";
 
-const Controls = ({useGuesses, game, letters, word, firstLetter, makeGuess, nextRound, hasStarted}) => {
+const Controls = ({
+  useGuesses,
+  game,
+  letters,
+  word,
+  firstLetter,
+  makeGuess,
+  nextRound,
+  hasStarted,
+  round,
+  maxRounds,
+}) => {
   const [guesses, setGuesses] = useGuesses;
   const keyboard = useRef();
   const usedFirst = useRef(false);
@@ -53,7 +64,7 @@ const Controls = ({useGuesses, game, letters, word, firstLetter, makeGuess, next
     <div className="controls">
       {!game.isPlaying ? (
         <button ref={button} onTouchEnd={nextRound} onClick={nextRound}>
-          {!hasStarted ? "Start Game" : "Next Round"}
+          {!hasStarted ? "Start Game" : round < maxRounds ? "Next Round" : "End Game"}
         </button>
       ) : (
         <ReactKeyboard

@@ -3,7 +3,7 @@ import {IoFlagOutline, IoInformationCircleOutline, IoTimerOutline} from "react-i
 import {BiBarChartAlt2} from "react-icons/bi";
 import axios from "axios";
 
-const Settings = ({game, setGame, word}) => {
+const Settings = ({game, setGame, word, showStats}) => {
   const toggleTimer = () => {
     const toggle = !game.timerEnabled;
     localStorage.setItem("timer", JSON.stringify(toggle));
@@ -17,7 +17,7 @@ const Settings = ({game, setGame, word}) => {
     }
   };
 
-  const leaderboard = () => alert("Leaderboard coming soon.");
+  const leaderboard = () => showStats(true);
 
   const define = () => {
     window.open(`https://www.google.com/search?q=define+${word.answer.toLowerCase()}`, "_blank");
@@ -33,6 +33,7 @@ const Settings = ({game, setGame, word}) => {
       >
         <IoTimerOutline />
       </div>
+
       {!(game.isPlaying || word.answer === "LINGO ") && (
         <>
           <div className="infoIcon" title="Google Definition" onClick={define} onTouchEnd={define}>
@@ -43,6 +44,7 @@ const Settings = ({game, setGame, word}) => {
           </div>
         </>
       )}
+
       <div className="leaderIcon" title="Show Leaderboard" onClick={leaderboard} onTouchEnd={leaderboard}>
         <BiBarChartAlt2 />
       </div>

@@ -7,14 +7,38 @@ import Board from "./components/Board";
 import Controls from "./components/Controls";
 import Settings from "./components/Settings";
 import TimerBar from "./components/TimerBar";
+import TopText from "./components/TopText";
+import useStatistics from "./components/useStatistics";
+
+const defaultState = {
+  word: {answer: "LINGO ", letters: {W: 1, O: 1, R: 1, D: 1, L: 1, E: 1}, correct: false},
+  guesses: {current: "", guesses: ["LINGO", "WAS", "MADE", "BEFORE", "WORDLE"]},
+};
 
 const getTimer = () => JSON.parse(localStorage.getItem("timer") || "true");
 
+const setConfirm = toggle => {
+  if (toggle) {
+    window.onbeforeunload = function () {
+      return "Are you sure you want to leave?";
+    };
+  } else {
+    window.onbeforeunload = undefined;
+  }
+};
+
+const generateEmptySet = () => {
+  const obj = {};
+  for (let i = 4; i <= 6; i++) obj[i] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, wrong: 0};
+  return obj;
+};
+
 const App = () => {
   const [words, setWords] = useState();
-  const [word, setWord] = useState({answer: "LINGO ", letters: {W: 1, O: 1, R: 1, D: 1, L: 1, E: 1}, correct: false});
-  const [guesses, setGuesses] = useState({current: "", guesses: ["LINGO", "WAS", "MADE", "BEFORE", "WORDLE"]});
+  const [word, setWord] = useState(defaultState.word);
+  const [guesses, setGuesses] = useState(defaultState.guesses);
   const [game, setGame] = useState({isPlaying: false, timerEnabled: getTimer()});
+  const [showStatistics, Statistics, setCurrent] = useStatistics();
 
   const guessSize = 5;
   const currentRound = useRef(0);
@@ -22,6 +46,12 @@ const App = () => {
   const counter = useRef(50);
   const hasStarted = currentRound.current > 0;
   const board = useRef();
+  const currentStats = useRef(generateEmptySet());
+
+  const rounds = Object.keys(words);
+  const levels = rounds.length;
+  const roundLength = 3;
+  const maxRounds = roundLength * levels;
 
   // Word lists from API
   useEffect(() => {
@@ -50,6 +80,7 @@ const App = () => {
     const timer = setInterval(() => {
       counter.current -= 0.25;
       if (counter.current <= 0) {
+        currentStats.current[word.answer.length].wrong++;
         setGame({...game, isPlaying: false});
       } else {
         setGame({...game, isPlaying: true});
@@ -57,15 +88,46 @@ const App = () => {
     }, 0.25 * 1000 * (15 / 100));
 
     return () => clearInterval(timer);
-  }, [game]);
+  }, [game, word.answer.length]);
 
   const nextRound = () => {
-    const rounds = Object.keys(words);
-    const levels = rounds.length;
-    const roundLength = 4;
+    if (++currentRound.current > maxRounds) {
+      let stats;
 
-    currentRound.current += 1;
-    // Cycle between the word lengths, 4 rounds per length
+      try {
+        stats = JSON.parse(localStorage.getItem("stats"));
+        console.log(stats, currentStats.current);
+
+        // For every word length
+        for (const [length, obj] of Object.entries(stats)) {
+          // For every attempt of each word length
+          for (const [attempts, count] of Object.entries(obj)) {
+            stats[length][attempts] += currentStats.current[length][attempts];
+            console.log("Length & Attempts:", length, attempts);
+            console.log("Count:", count);
+            console.log("Current count:", currentStats.current[length][attempts]);
+            console.log("Sum:", count + currentStats.current[length][attempts]);
+          }
+        }
+
+        console.log(stats);
+      } catch (e) {
+        console.log(e);
+        stats = {...currentStats.current};
+      }
+
+      setCurrent(currentStats.current);
+      showStatistics(true);
+
+      setConfirm(false);
+      setWord(defaultState.word);
+      setGuesses(defaultState.guesses);
+      currentStats.current = generateEmptySet();
+      currentRound.current = 0;
+      return localStorage.setItem("stats", JSON.stringify(stats));
+    }
+
+    // Cycle between the word lengths, 3 rounds per length
     const wordLength = rounds[Math.floor((currentRound.current - 1) / roundLength) % levels];
 
     // Select a word from round's word length
@@ -92,6 +154,7 @@ const App = () => {
       perfect: new Set([firstLetter]),
     };
 
+    setConfirm(true);
     setWords(tempWords);
     setWord({answer, letters: answerLetters});
     setGuesses({current: firstLetter, guesses: []});
@@ -116,6 +179,12 @@ const App = () => {
     setGuesses({current: "", guesses: temp});
 
     if (guess === word.answer || guesses.guesses.length + 1 >= guessSize) {
+      if (guess === word.answer) {
+        currentStats.current[word.answer.length][guesses.guesses.length + 1]++;
+      } else {
+        currentStats.current[word.answer.length].wrong++;
+      }
+
       setGame({...game, isPlaying: false});
     } else {
       counter.current = 100;
@@ -133,54 +202,61 @@ const App = () => {
   };
 
   return (
-    <div className="game">
-      <Settings game={game} setGame={setGame} word={word} />
+    <>
+      <Statistics />
 
-      <div className="toast">
-        <ToastContainer
-          position="top-right"
-          autoClose={2000}
-          hideProgressBar
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss={false}
-          draggable={false}
-          pauseOnHover={false}
-          theme="dark"
-        />
+      <div className="game">
+        <Settings game={game} setGame={setGame} word={word} showStats={showStatistics} />
+
+        <div className="toast">
+          <ToastContainer
+            position="top-right"
+            autoClose={2000}
+            hideProgressBar
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable={false}
+            pauseOnHover={false}
+            theme="dark"
+          />
+        </div>
+
+        <TopText hasStarted={hasStarted} currentRound={currentRound} />
+
+        <div>
+          <Board
+            guessSize={guessSize}
+            guesses={guesses}
+            word={word}
+            game={game}
+            hasStarted={hasStarted}
+            letters={letters}
+            board={board}
+          />
+          {game.timerEnabled && <TimerBar percent={counter.current} />}
+        </div>
+
+        {!words ? (
+          <div className="spinner" />
+        ) : (
+          <Controls
+            game={game}
+            useGuesses={[guesses, setGuesses]}
+            firstLetter={word.answer[0]}
+            letters={letters}
+            word={word}
+            hasStarted={hasStarted}
+            makeGuess={makeGuess}
+            nextRound={nextRound}
+            round={currentRound.current}
+            maxRounds={maxRounds}
+          />
+        )}
+        <small className="disclaimer">*Scores are only saved when you finish all 9 rounds</small>
       </div>
-
-      <div className="title">{hasStarted ? <h2>Round: {currentRound.current}</h2> : <h1>Peaky Lingo</h1>}</div>
-
-      <div>
-        <Board
-          guessSize={guessSize}
-          guesses={guesses}
-          word={word}
-          game={game}
-          hasStarted={hasStarted}
-          letters={letters}
-          board={board}
-        />
-        {game.timerEnabled && <TimerBar percent={counter.current} />}
-      </div>
-
-      {!words ? (
-        <div className="spinner" />
-      ) : (
-        <Controls
-          game={game}
-          useGuesses={[guesses, setGuesses]}
-          firstLetter={word.answer[0]}
-          letters={letters}
-          word={word}
-          hasStarted={hasStarted}
-          makeGuess={makeGuess}
-          nextRound={nextRound}
-        />
-      )}
-    </div>
+    </>
   );
 };
 

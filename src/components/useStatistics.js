@@ -40,7 +40,7 @@ const useStatistics = () => {
 
   const Statistics = () => {
     return (
-      <div className="leaderboard" style={{display: show ? (vw > 500 ? "flex" : "block") : "none"}}>
+      <div className="leaderboard" style={{display: !show ? "none" : undefined}}>
         <div className="modal">
           <div className="toggle" title="Toggle Between Last and All Games" onClick={onToggle} onTouchEnd={onToggle}>
             {current && (toggleSet ? <BsToggleOn /> : <BsToggleOff />)}

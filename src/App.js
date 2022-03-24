@@ -159,7 +159,7 @@ const App = () => {
       return false;
     }
 
-    if (window.dictionary && !window.dictionary.includes(guesses.current.toLowerCase())) {
+    if (window.dictionary && guess !== word.answer && !window.dictionary.includes(guesses.current.toLowerCase())) {
       doShake("Word not accepted.");
       return false;
     }

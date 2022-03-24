@@ -21,9 +21,7 @@ const Settings = ({game, setGame, word, showStats}) => {
   const reloadServiceWorker = () => {
     if (serviceWorker.current) {
       serviceWorker.current.addEventListener("statechange", e => {
-        if (e.target.state === "activated") {
-          window.location.reload();
-        }
+        if (e.target.state === "activated") window.location.reload();
       });
       serviceWorker.current.postMessage({type: "SKIP_WAITING"});
       document.getElementById("root").innerHTML = "<h1>Updating service worker. Please wait...</h1>";

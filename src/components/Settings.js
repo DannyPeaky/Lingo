@@ -1,9 +1,35 @@
-import React from "react";
-import {IoFlagOutline, IoInformationCircleOutline, IoTimerOutline} from "react-icons/io5";
+import React, {useEffect, useState, useRef} from "react";
+import {IoFlagOutline, IoInformationCircleOutline, IoTimerOutline, IoReloadCircleOutline} from "react-icons/io5";
 import {BiBarChartAlt2} from "react-icons/bi";
 import axios from "axios";
 
 const Settings = ({game, setGame, word, showStats}) => {
+  const [showUpdate, setShowUpdate] = useState(false);
+  const serviceWorker = useRef();
+
+  useEffect(() => {
+    const handleUpdate = e => {
+      serviceWorker.current = e.detail;
+      if (serviceWorker.current) setShowUpdate(true);
+      else setShowUpdate(false);
+    };
+
+    window.addEventListener("updateIsReady", handleUpdate);
+    return () => window.removeEventListener("updateIsReady", handleUpdate);
+  });
+
+  const reloadServiceWorker = () => {
+    if (serviceWorker.current) {
+      serviceWorker.current.addEventListener("statechange", e => {
+        if (e.target.state === "activated") {
+          window.location.reload();
+        }
+      });
+      serviceWorker.current.postMessage({type: "SKIP_WAITING"});
+      document.getElementById("root").innerHTML = "<h1>Updating service worker. Please wait...</h1>";
+    }
+  };
+
   const toggleTimer = () => {
     const toggle = !game.timerEnabled;
     localStorage.setItem("timer", JSON.stringify(toggle));
@@ -48,6 +74,16 @@ const Settings = ({game, setGame, word, showStats}) => {
       <div className="leaderIcon" title="Show Leaderboard" onClick={leaderboard} onTouchEnd={leaderboard}>
         <BiBarChartAlt2 />
       </div>
+      {showUpdate && (
+        <div
+          className="leaderIcon"
+          title="Reload Service Worker"
+          onClick={reloadServiceWorker}
+          onTouchEnd={reloadServiceWorker}
+        >
+          <IoReloadCircleOutline />
+        </div>
+      )}
     </div>
   );
 };

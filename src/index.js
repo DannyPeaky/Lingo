@@ -11,4 +11,9 @@ ReactDOM.render(
   document.getElementById("root")
 );
 
-serviceWorkerRegistration.register();
+serviceWorkerRegistration.register({
+  onUpdate: registration => {
+    const waitingServiceWorker = registration.waiting;
+    window.dispatchEvent(new CustomEvent("updateIsReady", {detail: waitingServiceWorker}));
+  },
+});

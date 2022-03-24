@@ -31,7 +31,7 @@ const useStatistics = () => {
       title: {display: false},
       datalabels: {anchor: "end", align: "start", clip: true},
     },
-    scales: {x: scales, y: {...scales, beginAtZero: true}},
+    scales: {x: scales, y: {...scales, beginAtZero: true, suggestedMax: 5, ticks: {stepSize: 1}}},
   };
 
   const onToggle = () => setToggleSet(!toggleSet);

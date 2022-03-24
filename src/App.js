@@ -230,7 +230,7 @@ const App = () => {
           {game.timerEnabled && <TimerBar percent={counter.current} />}
         </div>
 
-        {!words ? (
+        {!Object.keys(words).length ? (
           <div className="spinner" />
         ) : (
           <Controls

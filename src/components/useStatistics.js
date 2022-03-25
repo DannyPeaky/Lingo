@@ -40,7 +40,7 @@ const useStatistics = () => {
       exportObj(
         {
           guessCounts: JSON.parse(localStorage.getItem("stats")),
-          rounds: JSON.parse(localStorage.getItem("guesses")),
+          rounds: JSON.parse(localStorage.getItem("rounds")),
         },
         "LingoStats"
       );

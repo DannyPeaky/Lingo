@@ -53,6 +53,7 @@ const Controls = ({
         setGuesses({...guesses, current: newGuess});
         keyboard.current.setInput(newGuess);
       } else if (!doubleLetter(key) && key.length <= 1 && guesses.current.length + 1 <= word.answer.length) {
+        if (!/^[A-Z]+$/.test(key)) key = "";
         const newGuess = guesses.current + key;
         setGuesses({...guesses, current: newGuess});
         keyboard.current.setInput(newGuess);
@@ -93,7 +94,6 @@ const Controls = ({
             "{bksp}": "⌫",
             "{enter}": "GUESS",
           }}
-          // onChange={input => !doubleLetter(input, true) && setGuess(input)}
           onKeyPress={handleInput}
           maxLength={word.answer.length}
           onInit={keyboard => {

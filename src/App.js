@@ -109,7 +109,7 @@ const App = () => {
   const saveRound = guess => {
     const allRounds = JSON.parse(localStorage.getItem("rounds") || "[]");
     allRounds.push({answer: word.answer, correct: word.answer === guess, guesses: [...guesses.guesses, guess]});
-    localStorage.setItem("guesses", JSON.stringify(allRounds));
+    localStorage.setItem("rounds", JSON.stringify(allRounds));
   };
 
   const nextRound = () => {

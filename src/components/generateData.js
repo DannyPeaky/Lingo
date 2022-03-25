@@ -26,6 +26,7 @@ const generateData = thisRound => {
       data: labels.map(l => stats[l][set] ?? stats[l].wrong),
       backgroundColor: colors[set].bar,
       datalabels: {color: colors[set].text || "#fff"},
+      minBarLength: 10,
     };
 
     data.datasets.push(obj);

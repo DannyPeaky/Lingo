@@ -74,7 +74,7 @@ const Settings = ({game, setGame, word, showStats}) => {
       </div>
       {showUpdate && (
         <div
-          className="leaderIcon"
+          className="reloadIcon"
           title="Reload Service Worker"
           onClick={reloadServiceWorker}
           onTouchEnd={reloadServiceWorker}

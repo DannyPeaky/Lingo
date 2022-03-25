@@ -37,7 +37,7 @@ const App = () => {
 
   const guessSize = 5;
   const currentRound = useRef(0);
-  const letters = useRef({incorrect: new Set(), correct: new Set(), perfect: new Set(["A"])});
+  const letters = useRef({incorrect: new Set(), correct: new Set(), perfect: new Set()});
   const counter = useRef(50);
   const hasStarted = currentRound.current > 0;
   const board = useRef();
@@ -76,6 +76,7 @@ const App = () => {
       counter.current -= 0.25;
       if (counter.current <= 0) {
         updateScore(false);
+        saveRound();
         setGame({...game, isPlaying: false});
       } else {
         setGame({...game, isPlaying: true});
@@ -105,6 +106,12 @@ const App = () => {
     localStorage.setItem("stats", JSON.stringify(stats));
   };
 
+  const saveRound = guess => {
+    const allRounds = JSON.parse(localStorage.getItem("rounds") || "[]");
+    allRounds.push({answer: word.answer, correct: word.answer === guess, guesses: [...guesses.guesses, guess]});
+    localStorage.setItem("guesses", JSON.stringify(allRounds));
+  };
+
   const nextRound = () => {
     if (++currentRound.current > maxRounds) {
       showStatistics(true);
@@ -112,6 +119,7 @@ const App = () => {
       setWord(defaultState.word);
       setGuesses(defaultState.guesses);
       currentRound.current = 0;
+      return;
     }
 
     // Cycle between the word lengths, 3 rounds per length
@@ -166,6 +174,7 @@ const App = () => {
     setGuesses({current: "", guesses: temp});
 
     if (guess === word.answer || guesses.guesses.length + 1 >= guessSize) {
+      saveRound(guess);
       updateScore(guess === word.answer);
       setGame({...game, isPlaying: false});
     } else {

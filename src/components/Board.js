@@ -1,4 +1,4 @@
-import {drawTiles, drawAnswer} from "./drawTiles";
+import {drawTiles, drawAnswer} from "../functions/drawTiles";
 
 const Board = ({guesses, guessSize, word, game, hasStarted, letters, board}) => {
   const gridTemplateColumns = `repeat(${word.answer.length}, 1fr)`;

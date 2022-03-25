@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import generateEmptySet from "./functions/generateEmptySet";
 
 import Board from "./components/Board";
 import Controls from "./components/Controls";
@@ -27,18 +28,12 @@ const setConfirm = toggle => {
   }
 };
 
-const generateEmptySet = () => {
-  const obj = {};
-  for (let i = 4; i <= 6; i++) obj[i] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, wrong: 0};
-  return obj;
-};
-
 const App = () => {
   const [words, setWords] = useState({});
   const [word, setWord] = useState(defaultState.word);
   const [guesses, setGuesses] = useState(defaultState.guesses);
   const [game, setGame] = useState({isPlaying: false, timerEnabled: getTimer()});
-  const [showStatistics, Statistics, setCurrent] = useStatistics();
+  const [showStatistics, Statistics] = useStatistics();
 
   const guessSize = 5;
   const currentRound = useRef(0);
@@ -46,7 +41,7 @@ const App = () => {
   const counter = useRef(50);
   const hasStarted = currentRound.current > 0;
   const board = useRef();
-  const currentStats = useRef(generateEmptySet());
+  // const currentStats = useRef(generateEmptySet());
 
   const rounds = Object.keys(words);
   const levels = rounds.length;
@@ -80,7 +75,7 @@ const App = () => {
     const timer = setInterval(() => {
       counter.current -= 0.25;
       if (counter.current <= 0) {
-        currentStats.current[word.answer.length].wrong++;
+        updateScore(false);
         setGame({...game, isPlaying: false});
       } else {
         setGame({...game, isPlaying: true});
@@ -88,35 +83,35 @@ const App = () => {
     }, 0.25 * 1000 * (15 / 100));
 
     return () => clearInterval(timer);
-  }, [game, word.answer.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game]);
+
+  const updateScore = correct => {
+    let stats;
+
+    try {
+      stats = JSON.parse(localStorage.getItem("stats"));
+      if (!stats) throw new Error("No Stats Available.");
+    } catch (e) {
+      stats = generateEmptySet();
+    }
+
+    if (correct) {
+      stats[word.answer.length][guesses.guesses.length + 1]++;
+    } else {
+      stats[word.answer.length].wrong++;
+    }
+
+    localStorage.setItem("stats", JSON.stringify(stats));
+  };
 
   const nextRound = () => {
     if (++currentRound.current > maxRounds) {
-      let stats;
-
-      try {
-        stats = JSON.parse(localStorage.getItem("stats"));
-
-        // For every word length
-        for (const [length, obj] of Object.entries(stats)) {
-          // For every attempt of each word length
-          for (const [attempts] of Object.entries(obj)) {
-            stats[length][attempts] += currentStats.current[length][attempts];
-          }
-        }
-      } catch (e) {
-        stats = {...currentStats.current};
-      }
-
-      setCurrent(currentStats.current);
       showStatistics(true);
-
       setConfirm(false);
       setWord(defaultState.word);
       setGuesses(defaultState.guesses);
-      currentStats.current = generateEmptySet();
       currentRound.current = 0;
-      return localStorage.setItem("stats", JSON.stringify(stats));
     }
 
     // Cycle between the word lengths, 3 rounds per length
@@ -171,12 +166,7 @@ const App = () => {
     setGuesses({current: "", guesses: temp});
 
     if (guess === word.answer || guesses.guesses.length + 1 >= guessSize) {
-      if (guess === word.answer) {
-        currentStats.current[word.answer.length][guesses.guesses.length + 1]++;
-      } else {
-        currentStats.current[word.answer.length].wrong++;
-      }
-
+      updateScore(guess === word.answer);
       setGame({...game, isPlaying: false});
     } else {
       counter.current = 100;
@@ -246,7 +236,6 @@ const App = () => {
             maxRounds={maxRounds}
           />
         )}
-        <small className="disclaimer">*Scores are only saved when you finish all {maxRounds} rounds</small>
       </div>
     </>
   );

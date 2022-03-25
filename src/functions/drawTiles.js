@@ -1,4 +1,4 @@
-import Tile from "./Tile";
+import Tile from "../components/Tile";
 
 const drawTiles = (guesses, guessSize, word, kl) => {
   const tiles = [];

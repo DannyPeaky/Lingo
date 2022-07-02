@@ -50,8 +50,8 @@ const App = () => {
 
   // Word lists from API
   useEffect(() => {
-    const getWords = async () => await axios.get("https://api.peaky.uk/peaky/items/lingo?limit=-1");
-    const getDictionary = async () => await axios.get("https://www.danpeak.co.uk/dictionary.json").catch(() => []);
+    const getWords = async () => await axios.get("https://api.danpeak.co.uk/items/lingo?limit=-1");
+    const getDictionary = async () => await axios.get("/dictionary.json").catch(() => []);
 
     const getWordLists = async () => {
       const temp = {4: [], 5: [], 6: []};

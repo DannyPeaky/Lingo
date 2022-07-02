@@ -37,7 +37,7 @@ const Settings = ({game, setGame, word, showStats}) => {
   const flagWord = () => {
     if (window.confirm(`Flag the word: ${word.answer}?`)) {
       window.alert(`${word.answer} has been flagged.`);
-      axios.patch("https://api.peaky.uk/peaky/items/lingo/" + word.answer, {flagged: 1});
+      axios.patch("https://api.danpeak.co.uk/items/lingo/" + word.answer, {flagged: 1});
     }
   };
 

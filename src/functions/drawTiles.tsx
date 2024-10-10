@@ -1,11 +1,17 @@
 import Tile from "../components/Tile";
+import { Guesses, Word } from "../types";
 
-const drawTiles = (guesses, guessSize, word, kl) => {
-  const tiles = [];
+const drawTiles = (
+  guesses: Guesses,
+  guessSize: number,
+  word: Word,
+  kl: { incorrect: Set<string>; correct: Set<string>; perfect: Set<string> }
+) => {
+  const tiles: JSX.Element[] = [];
 
   let k = 0;
   for (let i = 0; i < guessSize; i++) {
-    const letterCount = {...word.letters};
+    const letterCount = { ...word.letters };
 
     // Remove perfect letters from letter count to prevent duplicates
     for (let j = 0; j < word.answer.length; j++) {
@@ -59,7 +65,7 @@ const drawTiles = (guesses, guessSize, word, kl) => {
   return tiles;
 };
 
-const drawAnswer = word => {
+const drawAnswer = (word: Word) => {
   const tiles = [];
   let k = Math.random();
   for (const letter of word.answer) {
@@ -68,4 +74,4 @@ const drawAnswer = word => {
   return tiles;
 };
 
-export {drawTiles, drawAnswer};
+export { drawTiles, drawAnswer };

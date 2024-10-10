@@ -1,7 +1,6 @@
-import React, {useEffect, useRef, useState} from "react";
-import {ToastContainer, toast} from "react-toastify";
+import { useEffect, useRef, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
 import generateEmptySet from "./functions/generateEmptySet";
 
 import Board from "./components/Board";
@@ -10,40 +9,49 @@ import Settings from "./components/Settings";
 import TimerBar from "./components/TimerBar";
 import TopText from "./components/TopText";
 import useStatistics from "./components/useStatistics";
+import { Guesses, Word } from "./types";
+import axios from "axios";
 
-const defaultState = {
-  word: {answer: "LINGO ", letters: {W: 1, O: 1, R: 1, D: 1, L: 1, E: 1}, correct: false},
-  guesses: {current: "", guesses: ["LINGO", "WAS", "MADE", "BEFORE", "WORDLE"]},
+declare global {
+  interface Window {
+    dictionary: string[];
+  }
+}
+
+const defaultState: {
+  word: Word;
+  guesses: Guesses;
+} = {
+  word: { answer: "LINGO ", letters: { W: 1, O: 1, R: 1, D: 1, L: 1, E: 1 }, correct: false },
+  guesses: { current: "", guesses: ["LINGO", "WAS", "MADE", "BEFORE", "WORDLE"] },
 };
 
 const getTimer = () => JSON.parse(localStorage.getItem("timer") || "true");
 
-const setConfirm = toggle => {
+const setConfirm = (toggle: boolean) => {
   if (toggle) {
-    window.onbeforeunload = function () {
-      return "Are you sure you want to leave?";
-    };
+    window.onbeforeunload = () => "Are you sure you want to leave?";
   } else {
-    window.onbeforeunload = undefined;
+    window.onbeforeunload = () => null;
   }
 };
 
 const App = () => {
-  const [words, setWords] = useState({});
+  const [words, setWords] = useState<Record<number, string[]>>({});
   const [word, setWord] = useState(defaultState.word);
   const [guesses, setGuesses] = useState(defaultState.guesses);
-  const [game, setGame] = useState({isPlaying: false, timerEnabled: getTimer()});
+  const [game, setGame] = useState({ isPlaying: false, timerEnabled: getTimer() });
   const [showStatistics, Statistics] = useStatistics();
 
   const guessSize = 5;
   const currentRound = useRef(0);
-  const letters = useRef({incorrect: new Set(), correct: new Set(), perfect: new Set()});
+  const letters = useRef({ incorrect: new Set<string>(), correct: new Set<string>(), perfect: new Set<string>() });
   const counter = useRef(50);
   const hasStarted = currentRound.current > 0;
-  const board = useRef();
+  const board = useRef<HTMLDivElement>(null);
   // const currentStats = useRef(generateEmptySet());
 
-  const rounds = Object.keys(words);
+  const rounds = Object.keys(words) as unknown as number[];
   const levels = rounds.length;
   const roundLength = 3;
   const maxRounds = roundLength * levels;
@@ -51,14 +59,15 @@ const App = () => {
   // Word lists from API
   useEffect(() => {
     const getWords = async () => await axios.get("https://api.danpeak.co.uk/items/lingo?limit=-1");
-    const getDictionary = async () => await axios.get("/dictionary.json").catch(() => []);
+    // prettier-ignore
+    const getDictionary = async () => await axios.get("/dictionary.json").catch(() => ({data: []}));
 
     const getWordLists = async () => {
-      const temp = {4: [], 5: [], 6: []};
+      const temp: Record<number, string[]> = { 4: [], 5: [], 6: [] };
 
       // Get words from API, filter flagged words, and sort into word length
       const [words, dictionary] = await Promise.all([getWords(), getDictionary()]);
-      for (const {word, flagged} of words.data.data) if (!flagged && temp[word.length]) temp[word.length].push(word);
+      for (const { word, flagged } of words.data.data) if (!flagged && temp[word.length]) temp[word.length].push(word);
 
       window.dictionary = dictionary.data;
       setWords(temp);
@@ -77,9 +86,9 @@ const App = () => {
       if (counter.current <= 0) {
         updateScore(false);
         saveRound();
-        setGame({...game, isPlaying: false});
+        setGame({ ...game, isPlaying: false });
       } else {
-        setGame({...game, isPlaying: true});
+        setGame({ ...game, isPlaying: true });
       }
     }, 0.25 * 1000 * (15 / 100));
 
@@ -87,13 +96,13 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game]);
 
-  const updateScore = correct => {
+  const updateScore = (correct: boolean) => {
     let stats;
 
     try {
-      stats = JSON.parse(localStorage.getItem("stats"));
+      stats = JSON.parse(localStorage.getItem("stats")!);
       if (!stats) throw new Error("No Stats Available.");
-    } catch (e) {
+    } catch {
       stats = generateEmptySet();
     }
 
@@ -106,9 +115,9 @@ const App = () => {
     localStorage.setItem("stats", JSON.stringify(stats));
   };
 
-  const saveRound = guess => {
+  const saveRound = (guess?: string) => {
     const allRounds = JSON.parse(localStorage.getItem("rounds") || "[]");
-    allRounds.push({answer: word.answer, correct: word.answer === guess, guesses: [...guesses.guesses, guess]});
+    allRounds.push({ answer: word.answer, correct: word.answer === guess, guesses: [...guesses.guesses, guess] });
     localStorage.setItem("rounds", JSON.stringify(allRounds));
   };
 
@@ -131,13 +140,13 @@ const App = () => {
     const firstLetter = answer[0];
 
     // Count letters to prevent duplicate letter bug
-    const answerLetters = {};
-    answer.split("").forEach(letter => {
+    const answerLetters: Record<string, number> = {};
+    answer.split("").forEach((letter: string) => {
       answerLetters[letter] = ++answerLetters[letter] || 1;
     });
 
     // Remove selected word
-    const tempWords = {...words};
+    const tempWords = { ...words };
     tempWords[wordLength] = tempWords[wordLength].filter(word => word !== answer);
 
     // Reset Timer
@@ -151,12 +160,12 @@ const App = () => {
 
     setConfirm(true);
     setWords(tempWords);
-    setWord({answer, letters: answerLetters});
-    setGuesses({current: firstLetter, guesses: []});
-    setGame({...game, isPlaying: true});
+    setWord({ answer, letters: answerLetters });
+    setGuesses({ current: firstLetter, guesses: [] });
+    setGame({ ...game, isPlaying: true });
   };
 
-  const makeGuess = guess => {
+  const makeGuess = (guess: string) => {
     if (guess.length < word.answer.length) {
       doShake("Not enough letters.");
       return false;
@@ -171,12 +180,12 @@ const App = () => {
 
     const temp = [...guesses.guesses];
     temp.push(guess);
-    setGuesses({current: "", guesses: temp});
+    setGuesses({ current: "", guesses: temp });
 
     if (guess === word.answer || guesses.guesses.length + 1 >= guessSize) {
       saveRound(guess);
       updateScore(guess === word.answer);
-      setGame({...game, isPlaying: false});
+      setGame({ ...game, isPlaying: false });
     } else {
       counter.current = 100;
     }
@@ -184,11 +193,11 @@ const App = () => {
     return true;
   };
 
-  const doShake = message => {
+  const doShake = (message: string) => {
     toast.error(message);
-    board.current.classList.add("shake");
+    board.current?.classList.add("shake");
     setTimeout(() => {
-      board.current.classList.remove("shake");
+      board.current?.classList.remove("shake");
     }, 500);
   };
 

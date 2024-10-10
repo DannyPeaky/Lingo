@@ -1,8 +1,22 @@
-import {useRef, useEffect} from "react";
+import { useRef, useEffect } from "react";
 import "react-simple-keyboard/build/css/index.css";
 import ReactKeyboard from "react-simple-keyboard";
+import { Guesses } from "../types";
 
-const Controls = ({
+interface Props {
+  useGuesses: [Guesses, (guesses: Guesses) => void];
+  game: { isPlaying: boolean };
+  letters: { current: { incorrect: Set<string>; correct: Set<string>; perfect: Set<string> } };
+  word: { answer: string };
+  firstLetter: string;
+  makeGuess: (guess: string) => boolean;
+  nextRound: () => void;
+  hasStarted: boolean;
+  round: number;
+  maxRounds: number;
+}
+
+const Controls: React.FC<Props> = ({
   useGuesses,
   game,
   letters,
@@ -15,16 +29,16 @@ const Controls = ({
   maxRounds,
 }) => {
   const [guesses, setGuesses] = useGuesses;
-  const keyboard = useRef();
+  const keyboard = useRef<any>();
   const usedFirst = useRef(false);
-  const button = useRef();
+  const button = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     window.addEventListener("keydown", handleInput);
     return () => window.removeEventListener("keydown", handleInput);
   });
 
-  const doubleLetter = (letter, isRSK) => {
+  const doubleLetter = (letter: string, isRSK?: boolean) => {
     letter = isRSK ? letter[1] : letter;
     if (letter === guesses.current?.[0] && !usedFirst.current) {
       keyboard.current.setInput(letter);
@@ -36,12 +50,12 @@ const Controls = ({
     }
   };
 
-  const handleInput = key => {
-    if (key.key) key = key.key;
+  const handleInput = (key: KeyboardEvent | string) => {
+    if (typeof key !== "string" && "key" in key) key = key.key;
     key = key.toUpperCase();
 
     if (!game.isPlaying) {
-      if (key === "ENTER") button.current.click();
+      if (key === "ENTER") button.current?.click();
     } else {
       if (key === "ENTER" || key === "{ENTER}") {
         const guess = guesses.current;
@@ -50,12 +64,12 @@ const Controls = ({
         }
       } else if (key === "BACKSPACE" || key === "{BKSP}") {
         const newGuess = guesses.current.slice(0, guesses.current.length - 1);
-        setGuesses({...guesses, current: newGuess});
+        setGuesses({ ...guesses, current: newGuess });
         keyboard.current.setInput(newGuess);
       } else if (!doubleLetter(key) && key.length <= 1 && guesses.current.length + 1 <= word.answer.length) {
         if (!/^[A-Z]+$/.test(key)) key = "";
         const newGuess = guesses.current + key;
-        setGuesses({...guesses, current: newGuess});
+        setGuesses({ ...guesses, current: newGuess });
         keyboard.current.setInput(newGuess);
       }
     }

@@ -1,9 +1,9 @@
-import React, {useState} from "react";
-import {IoCloseOutline, IoDownloadOutline} from "react-icons/io5";
+import { useState } from "react";
+import { IoCloseOutline, IoDownloadOutline } from "react-icons/io5";
 
-import {Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend} from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import {Bar} from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import generateData from "../functions/generateData";
 import exportObj from "../functions/exportObj";
 
@@ -19,18 +19,18 @@ const useStatistics = () => {
 
   const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
   const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-  const scales = {ticks: {color: "#fff"}, grid: {color: "#55555555", borderColor: "#fff"}};
+  const scales = { ticks: { color: "#fff" }, grid: { color: "#55555555", borderColor: "#fff" } };
 
   const options = {
     aspectRatio: vw / vh,
     responsive: true,
     plugins: {
-      legend: {position: vw > 700 ? "right" : "bottom", labels: {color: "#fff"}},
-      title: {display: false},
-      datalabels: {anchor: "end", align: "start", clip: true},
+      legend: { position: vw > 700 ? "right" : "bottom", labels: { color: "#fff" } },
+      title: { display: false },
+      datalabels: { anchor: "end", align: "start", clip: true },
     },
-    scales: {x: scales, y: {...scales, beginAtZero: true, suggestedMax: 5, ticks: {stepSize: 1}}},
-  };
+    scales: { x: scales, y: { ...scales, beginAtZero: true, suggestedMax: 5, ticks: { stepSize: 1 } } },
+  } as const;
 
   const onClose = () => setShow(false);
 
@@ -39,14 +39,14 @@ const useStatistics = () => {
     const onDownload = () =>
       exportObj(
         {
-          guessCounts: JSON.parse(localStorage.getItem("stats")),
-          rounds: JSON.parse(localStorage.getItem("rounds")),
+          guessCounts: JSON.parse(localStorage.getItem("stats")!),
+          rounds: JSON.parse(localStorage.getItem("rounds")!),
         },
         "LingoStats"
       );
 
     return (
-      <div className="leaderboard" style={{display: !show ? "none" : undefined}}>
+      <div className="leaderboard" style={{ display: !show ? "none" : undefined }}>
         <div className="modal">
           <div className="close" title="Close Modal" onClick={onClose} onTouchEnd={onClose}>
             <IoCloseOutline />
@@ -65,7 +65,7 @@ const useStatistics = () => {
     );
   };
 
-  return [setShow, Statistics];
+  return [setShow, Statistics] as const;
 };
 
 export default useStatistics;

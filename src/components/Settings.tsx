@@ -1,14 +1,21 @@
-import React, {useEffect, useState, useRef} from "react";
-import {IoFlagOutline, IoInformationCircleOutline, IoTimerOutline, IoReloadCircleOutline} from "react-icons/io5";
-import {BiBarChartAlt2} from "react-icons/bi";
+import { useEffect, useState, useRef } from "react";
+import { IoFlagOutline, IoInformationCircleOutline, IoTimerOutline, IoReloadCircleOutline } from "react-icons/io5";
+import { BiBarChartAlt2 } from "react-icons/bi";
 import axios from "axios";
 
-const Settings = ({game, setGame, word, showStats}) => {
+interface Props {
+  game: { timerEnabled: boolean; isPlaying: boolean };
+  setGame: (game: { timerEnabled: boolean; isPlaying: boolean }) => void;
+  word: { answer: string };
+  showStats: (show: boolean) => void;
+}
+
+const Settings: React.FC<Props> = ({ game, setGame, word, showStats }) => {
   const [showUpdate, setShowUpdate] = useState(false);
-  const serviceWorker = useRef();
+  const serviceWorker = useRef<any>();
 
   useEffect(() => {
-    const handleUpdate = e => {
+    const handleUpdate = (e: any) => {
       serviceWorker.current = e.detail;
       if (serviceWorker.current) setShowUpdate(true);
       else setShowUpdate(false);
@@ -20,24 +27,24 @@ const Settings = ({game, setGame, word, showStats}) => {
 
   const reloadServiceWorker = () => {
     if (serviceWorker.current) {
-      serviceWorker.current.addEventListener("statechange", e => {
+      serviceWorker.current.addEventListener("statechange", (e: any) => {
         if (e.target.state === "activated") window.location.reload();
       });
-      serviceWorker.current.postMessage({type: "SKIP_WAITING"});
-      document.getElementById("root").innerHTML = "<h1>Updating service worker. Please wait...</h1>";
+      serviceWorker.current.postMessage({ type: "SKIP_WAITING" });
+      document.getElementById("root")!.innerHTML = "<h1>Updating service worker. Please wait...</h1>";
     }
   };
 
   const toggleTimer = () => {
     const toggle = !game.timerEnabled;
     localStorage.setItem("timer", JSON.stringify(toggle));
-    setGame({...game, timerEnabled: toggle});
+    setGame({ ...game, timerEnabled: toggle });
   };
 
   const flagWord = () => {
     if (window.confirm(`Flag the word: ${word.answer}?`)) {
       window.alert(`${word.answer} has been flagged.`);
-      axios.patch("https://api.danpeak.co.uk/items/lingo/" + word.answer, {flagged: 1});
+      axios.patch("https://api.danpeak.co.uk/items/lingo/" + word.answer, { flagged: 1 });
     }
   };
 
